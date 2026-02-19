@@ -55,7 +55,7 @@ GOOGLE_API_KEY=your_gemini_api_key
 ## 📦 Local Installation
 1. **Clone the Repository**
 ```bash
-git clone [https://github.com/viochris/qna-telegram-bot-ptb.git](https://github.com/viochris/qna-telegram-bot-ptb.git)
+git clone https://github.com/viochris/qna-telegram-bot-ptb.git
 cd qna-telegram-bot-ptb
 ```
 
