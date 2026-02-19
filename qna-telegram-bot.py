@@ -3,7 +3,7 @@ import logging
 
 # Third-party libraries
 from dotenv import load_dotenv
-from telegram import Update
+from telegram import Update, constants
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from google import genai  # Required for the new Gemini SDK Client
 
@@ -89,13 +89,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         # We tell the AI who is speaking before giving it the actual message
         contextual_prompt = f"The user you are talking to is named {user_name}. They said: '{user_text}'"
 
-        # 3. Invoke the Google Gemini Generative AI Model with the contextual prompt
+        # 3. Trigger the 'Typing...' action indicator in the Telegram UI
+        await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING)
+
+        # 4. Invoke the Google Gemini Generative AI Model with the contextual prompt
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=contextual_prompt,
         )
 
-        # 4. Validate the LLM output safely
+        # 5. Validate the LLM output safely
         if response.text and len(response.text.strip()) > 0:
             reply_text = response.text
         else:
@@ -103,7 +106,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             reply_text = "I'm sorry, my AI engine couldn't process that. Could you try rephrasing?"
             
     except Exception as e: 
-        # 5. Handle API failures securely and categorize the error
+        # 6. Handle API failures securely and categorize the error
         error_msg = str(e).lower()
         logging.error(f"Failed to generate AI response for User {user_id} ({user_name}): {e}")
         
@@ -119,7 +122,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         else:
             reply_text = "⚠️ **System Error:** My AI engine is currently unreachable or busy. Please try again in a moment!"
 
-    # 6. Transmit the final formulated text back to the user asynchronously
+    # 7. Transmit the final formulated text back to the user asynchronously
     await context.bot.send_message(
         chat_id=chat_id, 
         text=reply_text, 
